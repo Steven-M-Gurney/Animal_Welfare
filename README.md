@@ -14,7 +14,7 @@ ________________________________________________________________________________
 ## Repository Directory
 
 
-### [Pigeon_Welfare.html](./Pigeon_Welfare.html): The HTML project report generated from the RMarkdown workflow.
+### [Pigeon_Welfare.pdf](./Pigeon_Welfare.pdf): PDF project report produced by RMarkdown workflow.
 
 ### [PigeonCounts.csv](./PigeonCounts.csv): Raw count data collected during randomized coop observations.
 
