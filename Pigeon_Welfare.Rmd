@@ -1,0 +1,110 @@
+---
+title: "Pigeons Prefer Flat Wooden Perches Over Round Metal Perches"
+author: "Steven Gurney"
+date: "07 NOV 2024"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo    = FALSE,
+  warning = FALSE,
+  message = FALSE,
+  error   = FALSE
+)
+
+library(knitr)
+library(tidyverse)
+```
+
+## Introduction
+
+### Purpose
+
+The purpose of this project is to see if pigeons (Figure 1) in the DTW coop prefer to perch on square wooden perches or round metal perches.
+
+### Background
+
+Pigeon-husbandry literature suggest that because of their and unique foot anatomy, flat-surfaced perches are best for pigeons ([AAV 2021](https://cdn.ymaws.com/www.aav.org/resource/collection/AE20E93E-0F61-4C20-AB88-E237BD795B43/Pigeon_Husbandry_Final.pdf)).
+
+```{r}
+# Include image for fun
+knitr::include_graphics("bird.jpg")
+```
+**Figure 1.** A beautiful rock pigeon caught at DTW. The unique, speckled plumage earned this bird the name Patches O'Houlihan.
+
+## Methods
+
+### Data Collection
+
+There were 20 independent, random observations of birds in the pigeon coop. Each observation included counting the number of pigeons perched on wood perches and the number of pigeons perched on metal perches. Note that in the coop, there were 2 wooden perches available and 5 metal perches available. These perches were spaced out relatively evenly and at comparable heights.
+
+### Analysis
+
+First, count data were standardized to account for unequal perch availability (2 wooden perches versus 5 metal). Specifically, count data were standardized to the number of birds per perch type, then we calculated summary statistics and compared means. We used one-sample t-tests to estimate the mean number of pigeons per perch type and their associated 95% confidence intervals. Means were considered different if confidence intervals did not overlap.
+
+### Data
+
+Here (below) were what the raw count data looked like; and the standardized count data (i.e., transformed raw counts to birds per perch type).
+```{r}
+# Load required packages
+library("tidyverse")
+
+# Read in the raw count data (collected randomly during field observations)
+dat <- read.csv("PigeonCounts.csv")
+
+# Take a look at the original count data.
+print(dat) 
+
+# Standardize counts.
+dat <- dat %>%
+  mutate(Standardized_Wood = Wood/2) %>% # total perched on wood/2 wood perches
+  mutate(Standardized_Metal = Metal/5) %>% # total perched on metal/5 metal perches
+  select(-Wood, -Metal) # Remove old columns
+
+# Take a look at the standardized data.
+print(dat)
+
+```
+## Results & Discussion
+We found that the number of pigeons per wooden perch was almost five times higher than the number per metal perch (Figure 2). More specifically, wooden perches supported an estimated mean of approximately 2.1 pigeons per perch (95% CI ≈ 1.72–2.43), whereas metal perches supported only 0.46 pigeons per perch on average (95% CI ≈ 0.28–0.64). Because these intervals do not overlap, the results indicate a clear and statistically robust difference in perch selection.
+
+Although more metal perches than wooden perches were available in the coop, the standardized counts revealed that pigeons used wooden perches at disproportionately higher rates. The difference between perch types was large in magnitude and consistent across sampling events, supporting the conclusion that pigeons preferred flat wooden perches to round metal perches.
+
+
+
+```{r include=FALSE}
+# Perform t-tests independently
+ttest_wood <- t.test(dat$Standardized_Wood) # Default 95% CI
+ttest_metal <- t.test(dat$Standardized_Metal)
+
+# Extract means and confidence intervals from the t-test results, and store in new data frame
+results_df <- tibble(
+  group = c("Flat Wood", "Round Metal"),
+  mean = c(ttest_wood$estimate, ttest_metal$estimate),
+  lower = c(ttest_wood$conf.int[1], ttest_metal$conf.int[1]),
+  upper = c(ttest_wood$conf.int[2], ttest_metal$conf.int[2])
+)
+
+# Take a look at the results
+print(results_df)
+```
+
+
+```{r}
+# Plot the confidence intervals and means using ggplot2
+ggplot(results_df, aes(x = group, ymin = lower, ymax = upper, y = mean, color = group)) +
+  geom_errorbar(width = 0.2) +  # Error bars for confidence intervals
+  geom_point(size = 5) + # Means
+  theme_classic() +
+  labs(y = "Mean number of pigeons per perch", x = "Perch type") +
+  theme(
+    axis.title = element_text(size = 14, face = "bold"),  # Same size, bold font labels
+    legend.position = "none"  # Remove the legend
+  )
+```
+
+**Figure 2.** Despite there being less wooden perches compared to metal (2 and 5, respectively), pigeons per wooden perch were almost 5 times higher compared to metal (Wood: Mean = 2.075, 95% CI = 1.717, 2.433; Metal: Mean = 0.460, 95% CI = 0.278, 0.642). These results demonstrate a statistically significant difference between perches, suggesting flat perch sites are important to rock pigeons. 
